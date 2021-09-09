@@ -1,0 +1,19 @@
+{
+  "chain": "predmarketchain",
+  "chains": {
+    "predmarketchain": "ggRvaPCAzd69nsQeT8uQvFDpCXnxmFgKgN9HYr9HoPdt",
+  },
+  "goshimmer": {
+    "api": "127.0.0.1:8080"
+  },
+  "wallet": {
+    "seed": "A11gDYMSFvwENxnXnCo3kzYQkF7FKaQQU6UcNaSsGaY7"
+  },
+  "wasp": {
+    "0": {
+      "api": "127.0.0.1:9090",
+      "nanomsg": "127.0.0.1:5550",
+      "peering": "127.0.0.1:4000"
+    }
+  }
+}

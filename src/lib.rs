@@ -184,7 +184,7 @@ fn closemarket(context: &ScFuncContext) {
                     let mut betvalue_totalbetamount: HashMap<String, i32> = HashMap::new();
                     // overall amount in bets, regardless on which outcome value the bet was placed
                     let mut totalbetamount:i32 = 0;
-                    for (betteraddress, bet) in &containerofbets.map {
+                    for (_betteraddress, bet) in &containerofbets.map {
                         totalbetamount = totalbetamount + bet.betamount;
                         if betvalue_totalbetamount.contains_key(&bet.betisforvalue) {
                             betvalue_totalbetamount.insert((&bet.betisforvalue).parse().unwrap(), betvalue_totalbetamount.get(&bet.betisforvalue).unwrap() + bet.betamount);
@@ -199,19 +199,24 @@ fn closemarket(context: &ScFuncContext) {
                     }
                     log = "total amount of bets over all values: ".to_string() + &totalbetamount.to_string() + &" IOTA".to_string(); context.log(&log);
 
+                    let mut totalbetamountforvalue: Option<&i32>;
+                    let mut winamount:i64;
+                    let mut recipientaddress:ScAddress;
                     // send coins to winners
                     for (betteraddress, bet) in &containerofbets.map {
                         if bet.betisforvalue.eq(&betvaluewinning.to_string()) {
                             log = betteraddress.to_string() + &" placed a bet on \"".to_string() + &bet.betisforvalue.to_string() + &"\", which is a WIN".to_string(); context.log(&log);
-                            let totalbetamountforvalue: Option<&i32> = betvalue_totalbetamount.get(&bet.betisforvalue);
-                            let winamount:i64 = ((bet.betamount / totalbetamountforvalue.unwrap()) * totalbetamount) as i64;
+                            totalbetamountforvalue  = betvalue_totalbetamount.get(&bet.betisforvalue);
+                            winamount = ((bet.betamount as f32/ *totalbetamountforvalue.unwrap() as f32) * totalbetamount as f32) as i64;
                             log = "bet amount: ".to_string() + &bet.betamount.to_string() + &" IOTA; won amount: " + &winamount.to_string() + &" IOTA; of total amount placed a bet on " + &totalbetamount.to_string() + &"; where total amount per winning value: " + &totalbetamountforvalue.unwrap().to_string();    context.log(&log);
-                            let recipientaddress:ScAddress = ScAddress::from_bytes(&*context.utility().base58_decode(&betteraddress.to_string()));
-                            log = "transferring won amount of IOTA to: ".to_string() +  &recipientaddress.to_string();  context.log(&log);
-                            context.transfer_to_address( &recipientaddress, ScTransfers::new(&ScColor::IOTA, winamount))
+                            if winamount>0 {
+                                recipientaddress = ScAddress::from_bytes(&*context.utility().base58_decode(&betteraddress.to_string()));
+                                log = "transferring won amount of IOTA to: ".to_string() +  &recipientaddress.to_string();  context.log(&log);
+                                context.transfer_to_address( &recipientaddress, ScTransfers::new(&ScColor::IOTA, winamount))
+                            }
                         }
                         else  {
-                            log = betteraddress.to_string() + &" placed a bet on on \"".to_string() + &bet.betisforvalue.to_string() + &"\", which is not a win".to_string(); context.log(&log);
+                            log = betteraddress.to_string() + &" placed a bet on \"".to_string() + &bet.betisforvalue.to_string() + &"\", which is not a win".to_string(); context.log(&log);
                         }
                     }
                 } else {
